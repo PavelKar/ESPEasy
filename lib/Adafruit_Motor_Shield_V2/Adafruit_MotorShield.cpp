@@ -1,4 +1,4 @@
-/******************************************************************
+ /******************************************************************
  This is the library for the Adafruit Motor Shield V2 for Arduino.
  It supports DC motors & Stepper motors with microstepping as well
  as stacking-support. It is *not* compatible with the V1 library!
@@ -217,7 +217,7 @@ void Adafruit_StepperMotor::release(void) {
 
 void Adafruit_StepperMotor::step(uint16_t steps, uint8_t dir,  uint8_t style) {
   uint32_t uspers = usperstep;
-  //uint8_t ret = 0;
+  uint8_t ret = 0;
 
   if (style == INTERLEAVE) {
     uspers /= 2;
