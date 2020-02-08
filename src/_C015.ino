@@ -1,4 +1,7 @@
 #ifdef USES_C015
+
+#include "src/Globals/CPlugins.h"
+
 //#######################################################################################################
 //########################### Controller Plugin 015: Blynk  #############################################
 //#######################################################################################################
@@ -36,6 +39,7 @@
  #define CPLUGIN_NAME_015       "Blynk [TESTING]"
  #define C015_LOG_PREFIX "BL: "
 #endif
+
 
 
 static unsigned long _C015_LastConnectAttempt[CONTROLLER_MAX] = {0,0,0};
@@ -105,14 +109,16 @@ bool CPlugin_015(byte function, struct EventStruct *event, String& string)
       {
         success = true;
         if (isFormItemChecked(F("controllerenabled"))){
-          for (byte i = 0; i < CONTROLLER_MAX; ++i) {
-            byte ProtocolIndex = getProtocolIndex(Settings.Protocol[i]);
-            if (i != event->ControllerIndex && Protocol[ProtocolIndex].Number == 15 && Settings.ControllerEnabled[i]) {
-              success = false;
-              // FIXME:  this will only show a warning message and not uncheck "enabled" in webform.
-              // Webserver object is not checking result of "success" var :(
-              addHtmlError(F("Only one enabled instance of blynk controller is supported"));
-              break;
+          for (controllerIndex_t i = 0; i < CONTROLLER_MAX; ++i) {
+            protocolIndex_t ProtocolIndex = getProtocolIndex_from_ControllerIndex(i);
+            if (validProtocolIndex(ProtocolIndex)) {
+              if (i != event->ControllerIndex && Protocol[ProtocolIndex].Number == 15 && Settings.ControllerEnabled[i]) {
+                success = false;
+                // FIXME:  this will only show a warning message and not uncheck "enabled" in webform.
+                // Webserver object is not checking result of "success" var :(
+                addHtmlError(F("Only one enabled instance of blynk controller is supported"));
+                break;
+              }
             }
           }
           // force to connect without delay when webform saved
@@ -138,8 +144,10 @@ bool CPlugin_015(byte function, struct EventStruct *event, String& string)
         // Collect the values at the same run, to make sure all are from the same sample
         byte valueCount = getValueCountFromSensorType(event->sensorType);
         C015_queue_element element(event, valueCount);
-        if (ExtraTaskSettings.TaskIndex != event->TaskIndex)
-          PluginCall(PLUGIN_GET_DEVICEVALUENAMES, event, dummyString);
+        if (ExtraTaskSettings.TaskIndex != event->TaskIndex) {
+          String dummy;
+          PluginCall(PLUGIN_GET_DEVICEVALUENAMES, event, dummy);
+        }
 
         for (byte x = 0; x < valueCount; x++)
         {
@@ -188,12 +196,14 @@ bool CPlugin_015(byte function, struct EventStruct *event, String& string)
 // Process Queued Blynk request, with data set to NULL
 //********************************************************************************
 // controller_plugin_number = 015 because of C015
+bool do_process_c015_delay_queue(int controller_plugin_number, const C015_queue_element& element, ControllerSettingsStruct& ControllerSettings);
+
 bool do_process_c015_delay_queue(int controller_plugin_number, const C015_queue_element& element, ControllerSettingsStruct& ControllerSettings) {
   if (!Settings.ControllerEnabled[element.controller_idx])
     // controller has been disabled. Answer true to flush queue.
     return true;
 
-  if (wifiStatus != ESPEASY_WIFI_SERVICES_INITIALIZED) {
+  if (!WiFiConnected()) {
     return false;
   }
 
@@ -355,38 +365,48 @@ boolean Blynk_send_c015(const String& value, int vPin )
 BLYNK_WRITE_DEFAULT() {
   byte vPin = request.pin;
   float pinValue = param.asFloat();
-  String log = F(C015_LOG_PREFIX "server set v");
-  log += vPin;
-  log += F(" to ");
-  log += pinValue;
-  addLog(LOG_LEVEL_INFO, log);
-  String eventCommand = F("blynkv");
-  eventCommand += vPin;
-  eventCommand += F("=");
-  eventCommand += pinValue;
-  rulesProcessing(eventCommand);
+  if (loglevelActiveFor(LOG_LEVEL_INFO)) {
+    String log = F(C015_LOG_PREFIX "server set v");
+    log += vPin;
+    log += F(" to ");
+    log += pinValue;
+    addLog(LOG_LEVEL_INFO, log);
+  }
+  if (Settings.UseRules) {
+    String eventCommand = F("blynkv");
+    eventCommand += vPin;
+    eventCommand += F("=");
+    eventCommand += pinValue;
+    eventQueue.add(eventCommand);
+  }
 }
 
 BLYNK_CONNECTED() {
-// Your code here when hardware connects to Blynk Cloud or private server.
-// It’s common to call sync functions inside of this function.
-// Requests all stored on the server latest values for all widgets.
-  String eventCommand = F("blynk_connected");
-  rulesProcessing(eventCommand);
+  // Your code here when hardware connects to Blynk Cloud or private server.
+  // It’s common to call sync functions inside of this function.
+  // Requests all stored on the server latest values for all widgets.
+  if (Settings.UseRules) {
+    String eventCommand = F("blynk_connected");
+    eventQueue.add(eventCommand);
+  }
   // addLog(LOG_LEVEL_INFO, F(C015_LOG_PREFIX "connected handler"));
 }
 
 // This is called when Smartphone App is opened
 BLYNK_APP_CONNECTED() {
-  String eventCommand = F("blynk_app_connected");
-  rulesProcessing(eventCommand);
+  if (Settings.UseRules) {
+    String eventCommand = F("blynk_app_connected");
+    eventQueue.add(eventCommand);
+  }
   // addLog(LOG_LEVEL_INFO, F(C015_LOG_PREFIX "app connected handler"));
 }
 
 // This is called when Smartphone App is closed
 BLYNK_APP_DISCONNECTED() {
-  String eventCommand = F("blynk_app_disconnected");
-  rulesProcessing(eventCommand);
+  if (Settings.UseRules) {
+    String eventCommand = F("blynk_app_disconnected");
+    eventQueue.add(eventCommand);
+  }
   // addLog(LOG_LEVEL_INFO, F(C015_LOG_PREFIX "app disconnected handler"));
 }
 

@@ -38,3 +38,7 @@ ESPEasy_mega-20190225_dev_ESP8285_1M.bin     | ESP8285 с 1Мб флеш  | Ст
 Details and discussion are on the "Experimental" section of the forum: https://www.letscontrolit.com/forum/viewforum.php?f=18
 
 Automated builds of the (new) documentation can be found at [ESPEasy.readthedocs.io](https://espeasy.readthedocs.io/en/latest/)
+
+## Icons used
+
+Icons on courtesy of [ICONS8](https://icons8.com/).

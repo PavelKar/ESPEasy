@@ -74,7 +74,11 @@ Adafruit_DCMotor *Adafruit_MotorShield::getMotor(uint8_t num) {
     // not init'd yet!
     dcmotors[num].motornum = num;
     dcmotors[num].MC = this;
+<<<<<<< HEAD
     uint8_t pwm = 0, in1 = 0, in2 = 0;
+=======
+    uint8_t pwm=0, in1=0, in2=0;
+>>>>>>> upstream/mega
     if (num == 0) {
       pwm = 8; in2 = 9; in1 = 10;
     } else if (num == 1) {
@@ -102,7 +106,11 @@ Adafruit_StepperMotor *Adafruit_MotorShield::getStepper(uint16_t steps, uint8_t 
     steppers[num].steppernum = num;
     steppers[num].revsteps = steps;
     steppers[num].MC = this;
+<<<<<<< HEAD
     uint8_t pwma = 0, pwmb = 0, ain1 = 0, ain2 = 0, bin1 = 0, bin2 = 0;
+=======
+    uint8_t pwma=0, pwmb=0, ain1=0, ain2=0, bin1=0, bin2=0;
+>>>>>>> upstream/mega
     if (num == 0) {
       pwma = 8; ain2 = 9; ain1 = 10;
       pwmb = 13; bin2 = 12; bin1 = 11;
@@ -217,7 +225,7 @@ void Adafruit_StepperMotor::release(void) {
 
 void Adafruit_StepperMotor::step(uint16_t steps, uint8_t dir,  uint8_t style) {
   uint32_t uspers = usperstep;
-  uint8_t ret = 0;
+  //uint8_t ret = 0;
 
   if (style == INTERLEAVE) {
     uspers /= 2;
@@ -232,7 +240,7 @@ void Adafruit_StepperMotor::step(uint16_t steps, uint8_t dir,  uint8_t style) {
 
   while (steps--) {
     //Serial.println("step!"); Serial.println(uspers);
-    ret = onestep(dir, style);
+    onestep(dir, style);
     delayMicroseconds(uspers);
     yield(); // required for ESP8266
   }
