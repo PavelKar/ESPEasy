@@ -14,7 +14,7 @@ Also there are more people on the forum that can help you with support.
 
 ## Pull requests
 
- * Make sure your code compiles.
+ * Убедитесь, что код скомпилирован.
 
  * Make sure your code does not have warnings. (Warnings will be treated as errors by our Travis system.)
 
@@ -30,4 +30,4 @@ Also there are more people on the forum that can help you with support.
 
  * New plugins that seem to be working correctly should have a PLUGIN_BUILD_TESTING around until they are tested enough. Also add [TESTING] to the name
 
- * Also see our general guidelines at: https://www.letscontrolit.com/wiki/index.php/ESPEasyDevelopmentGuidelines
+ * Вся документация здесь: https://www.letscontrolit.com/wiki/index.php/ESPEasyDevelopmentGuidelines
